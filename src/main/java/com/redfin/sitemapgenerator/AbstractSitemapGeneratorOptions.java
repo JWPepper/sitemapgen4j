@@ -2,17 +2,20 @@ package com.redfin.sitemapgenerator;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Date;
 
 // that weird thing with generics is so sub-classed objects will return themselves
 // It makes sense, I swear! http://madbean.com/2004/mb2004-3/
 abstract class AbstractSitemapGeneratorOptions<THIS extends AbstractSitemapGeneratorOptions<THIS>> {
 	File baseDir;
 	URL baseUrl;
+	String indexFileName = "sitemap_index.xml";
 	String fileNamePrefix = "sitemap";
 	boolean allowEmptySitemap = false;
 	boolean allowMultipleSitemaps = true;
 	String suffixStringPattern; // this will store some type of string pattern suitable per needs.
 	W3CDateFormat dateFormat;
+	Date defaultLastMod;
 	int maxUrls = SitemapGenerator.MAX_URLS_PER_SITEMAP;
 	boolean autoValidate = false;
 	boolean gzip = false;
@@ -27,6 +30,13 @@ abstract class AbstractSitemapGeneratorOptions<THIS extends AbstractSitemapGener
 		this(baseUrl, null);
 	}
 	
+	/** The file name for the index file, if one is generated; by default this is "sitemap_index.xml" */
+	public THIS indexFileName(String indexFileName) {
+		if (!indexFileName.equals("")) {
+			this.indexFileName = indexFileName;
+		}
+		return getThis();
+	}
 	/** The prefix of the name of the sitemaps we'll create; by default this is "sitemap" */
 	public THIS fileNamePrefix(String fileNamePrefix) {
 		if (fileNamePrefix == null) throw new NullPointerException("fileNamePrefix may not be null");
@@ -58,6 +68,11 @@ abstract class AbstractSitemapGeneratorOptions<THIS extends AbstractSitemapGener
 	/** The date formatter, typically configured with a {@link W3CDateFormat.Pattern} and/or a time zone */
 	public THIS dateFormat(W3CDateFormat dateFormat) {
 		this.dateFormat = dateFormat;
+		return getThis();
+	}
+	/** The default last modification date */
+	public THIS defaultLastMod(Date defaultLastMod) {
+		this.defaultLastMod = defaultLastMod;
 		return getThis();
 	}
 	/**

@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
@@ -18,12 +19,14 @@ abstract class SitemapGenerator<U extends ISitemapUrl, THIS extends SitemapGener
 	
 	private final URL baseUrl;
 	private final File baseDir;
+	private final String indexFileName;
 	private final String fileNamePrefix;
 	private final String fileNameSuffix;
 	private final boolean allowEmptySitemap;
 	private final boolean allowMultipleSitemaps;
 	private final ArrayList<U> urls = new ArrayList<U>();
 	private final W3CDateFormat dateFormat;
+	private final Date defaultLastMod;
 	private final int maxUrls;
 	private final boolean autoValidate;
 	private final boolean gzip;
@@ -36,10 +39,12 @@ abstract class SitemapGenerator<U extends ISitemapUrl, THIS extends SitemapGener
 	public SitemapGenerator(AbstractSitemapGeneratorOptions<?> options, ISitemapUrlRenderer<U> renderer) {
 		baseDir = options.baseDir;
 		baseUrl = options.baseUrl;
+		indexFileName = options.indexFileName;
 		fileNamePrefix = options.fileNamePrefix;
 		W3CDateFormat dateFormat = options.dateFormat;
 		if (dateFormat == null) dateFormat = new W3CDateFormat();
 		this.dateFormat = dateFormat;
+		defaultLastMod = options.defaultLastMod;
 		allowEmptySitemap = options.allowEmptySitemap;
 		allowMultipleSitemaps = options.allowMultipleSitemaps;
 		maxUrls = options.maxUrls;
@@ -218,7 +223,7 @@ abstract class SitemapGenerator<U extends ISitemapUrl, THIS extends SitemapGener
 	 * The sitemap index is written to {baseDir}/sitemap_index.xml
 	 */
 	public File writeSitemapsWithIndex() {
-		return writeSitemapsWithIndex(new File(baseDir, "sitemap_index.xml"));
+		return writeSitemapsWithIndex(new File(baseDir, indexFileName));
 	}
 
 	/**
@@ -241,7 +246,7 @@ abstract class SitemapGenerator<U extends ISitemapUrl, THIS extends SitemapGener
 	private SitemapIndexGenerator prepareSitemapIndexGenerator(File outFile) {
 		if (!finished) throw new RuntimeException("Sitemaps not generated yet; call write() first");
 		SitemapIndexGenerator sig;
-		sig = new SitemapIndexGenerator.Options(baseUrl, outFile).dateFormat(dateFormat).autoValidate(autoValidate).build();
+		sig = new SitemapIndexGenerator.Options(baseUrl, outFile).dateFormat(dateFormat).autoValidate(autoValidate).defaultLastMod(defaultLastMod).build();
 		sig.addUrls(fileNamePrefix, fileNameSuffix, mapCount);
 		return sig;
 	}
